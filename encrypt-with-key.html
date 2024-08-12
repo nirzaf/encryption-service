@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>String Encryption/Decryption</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container h1 {
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        .copy-btn {
+            background-color: #28a745;
+        }
+
+        .mode-toggle {
+            background-color: #ffc107;
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+
+        .dark-mode {
+            background-color: #333;
+            color: #f4f4f4;
+        }
+
+        .dark-mode .container {
+            background-color: #444;
+        }
+
+        .dark-mode .output {
+            background-color: #555;
+        }
+
+        .dark-mode button {
+            background-color: #007bff;
+        }
+
+        .dark-mode .copy-btn {
+            background-color: #28a745;
+        }
+
+        .dark-mode .mode-toggle {
+            background-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>String Encryption/Decryption</h1>
+
+        <label for="inputText">Input Text:</label>
+        <textarea id="inputText" rows="3"></textarea>
+
+        <label for="secret">Secret:</label>
+        <input type="text" id="secret" placeholder="Enter secret between 20-40 characters">
+
+        <button onclick="encryptText()">Encrypt</button>
+        <button onclick="decryptText()">Decrypt</button>
+
+        <div class="output" id="output"></div>
+        <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
+
+        <button class="mode-toggle" onclick="toggleMode()">Toggle Dark/Light Mode</button>
+    </div>
+
+    <script>
+        const ShiftFactor = 7;
+        const MultiplyFactor = 3;
+        const XorKey = 0xA5;
+        const MinSecretLength = 20;
+        const MaxSecretLength = 40;
+
+        function encryptText() {
+            const input = document.getElementById('inputText').value;
+            const secret = document.getElementById('secret').value;
+            validateSecret(secret);
+
+            const inputBytes = new TextEncoder().encode(input);
+            const secretBytes = new TextEncoder().encode(secret);
+            const outputBytes = new Uint8Array(inputBytes.length);
+
+            for (let i = 0; i < inputBytes.length; i++) {
+                let b = inputBytes[i];
+                let s = secretBytes[i % secretBytes.length];
+
+                b = (b << ShiftFactor) | (b >> (8 - ShiftFactor));
+                b = (b * MultiplyFactor) & 0xFF;
+                b = b ^ XorKey ^ s;
+                outputBytes[i] = b;
+            }
+
+            const result = btoa(String.fromCharCode(...outputBytes));
+            document.getElementById('output').innerText = result;
+        }
+
+        function decryptText() {
+            const input = document.getElementById('inputText').value;
+            const secret = document.getElementById('secret').value;
+            validateSecret(secret);
+
+            const inputBytes = Uint8Array.from(atob(input), c => c.charCodeAt(0));
+            const secretBytes = new TextEncoder().encode(secret);
+            const outputBytes = new Uint8Array(inputBytes.length);
+
+            for (let i = 0; i < inputBytes.length; i++) {
+                let b = inputBytes[i];
+                let s = secretBytes[i % secretBytes.length];
+
+                b = b ^ XorKey ^ s;
+                b = (b * modularMultiplicativeInverse(MultiplyFactor, 256)) & 0xFF;
+                b = (b >> ShiftFactor) | (b << (8 - ShiftFactor));
+                outputBytes[i] = b;
+            }
+
+            const result = new TextDecoder().decode(outputBytes);
+            document.getElementById('output').innerText = result;
+        }
+
+        function modularMultiplicativeInverse(a, m) {
+            for (let x = 1; x < m; x++) {
+                if ((a * x) % m === 1) {
+                    return x;
+                }
+            }
+            throw new Error("Modular multiplicative inverse does not exist.");
+        }
+
+        function validateSecret(secret) {
+            if (!secret || secret.length < MinSecretLength || secret.length > MaxSecretLength) {
+                throw new Error(`Secret string must be between ${MinSecretLength} and ${MaxSecretLength} characters long.`);
+            }
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output').innerText;
+            navigator.clipboard.writeText(output).then(() => {
+                alert('Copied to clipboard');
+            }, () => {
+                alert('Failed to copy');
+            });
+        }
+
+        function toggleMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
+</body>
+</html>
