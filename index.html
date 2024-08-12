@@ -1,157 +1,160 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Encryption/Decryption Service</title>
+<title>Text Encryption/Decryption</title>
 <style>
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-}
-
-h1 {
-  color: #333;
-  text-align: center;
-  margin-top: 2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .container {
-  background-color: #fff;
-  padding: 3rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  width: 80%;
-  max-width: 600px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 80%;
+    max-width: 600px;
 }
 
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #555;
+h1 {
+    color: #333;
 }
 
-input[type="text"],
 textarea {
-  width: 100%;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-  margin-bottom: 1rem;
-  font-size: 1rem;
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 120px;
 }
 
 button {
-  background-color: #04aa6d;
-  color: white;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+    background-color: #5cb85c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 5px;
 }
 
 button:hover {
-  background-color: #068c5a;
+    background-color: #4cae4c;
 }
 
 .output-container {
-  margin-top: 2rem;
-  background-color: #eee;
-  padding: 1rem;
-  border-radius: 4px;
-  word-break: break-all;
-  position: relative;
+    position: relative;
+    margin-top: 15px;
+}
+
+.output-container input {
+    width: calc(100% - 90px); 
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 .copy-button {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background-color: #3498db;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  color: white;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: background-color 0.3s;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background-color: #337ab7;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .copy-button:hover {
-  background-color: #217dbb;
+    background-color: #204d74;
 }
 </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Text Encryption/Decryption</h1>
+        <textarea id="inputTextArea" placeholder="Enter text here..."></textarea>
+        <br>
+        <button onclick="encryptText()">Encrypt</button>
+        <button onclick="decryptText()">Decrypt</button>
+        <div class="output-container">
+            <input type="text" id="outputTextArea" readonly>
+            <button class="copy-button" onclick="copyToClipboard()">Copy</button>
+        </div>
+    </div>
 
-<h1>Encryption/Decryption Service</h1>
+    <script>
+        const shiftFactor = 7;
+        const multiplyFactor = 3;
+        const xorKey = 0xA5;
 
-<div class="container">
-  <label for="input">Enter Text:</label>
-  <input type="text" id="input">
+        function encryptText() {
+            const inputText = document.getElementById("inputTextArea").value;
+            const encryptedText = encrypt(inputText);
+            document.getElementById("outputTextArea").value = encryptedText;
+        }
 
-  <button onclick="encrypt()">Encrypt</button>
-  <button onclick="decrypt()">Decrypt</button>
+        function decryptText() {
+            const inputText = document.getElementById("inputTextArea").value;
+            const decryptedText = decrypt(inputText);
+            document.getElementById("outputTextArea").value = decryptedText;
+        }
 
-  <div class="output-container" id="output-container">
-    <span id="output"></span>
-    <button class="copy-button" onclick="copyOutput()">Copy</button>
-  </div>
-</div>
+        function encrypt(input) {
+            let inputBytes = new TextEncoder("utf-8").encode(input);
+            let outputBytes = new Uint8Array(inputBytes.length);
 
-<script>
-  // Please provide your C# encryption and decryption methods
-  // I will help you convert them to JavaScript
+            for (let i = 0; i < inputBytes.length; i++) {
+                let b = inputBytes[i];
+                b = (b << shiftFactor) | (b >> (8 - shiftFactor));
+                b = (b * multiplyFactor) & 0xFF; // Ensure 8-bit result
+                b ^= xorKey;
+                outputBytes[i] = b;
+            }
 
-  function encrypt() {
-    // Your encryption logic here
-    const input = document.getElementById("input").value;
-    // Example: simple Caesar cipher
-    const encrypted = caesarCipher(input, 3); 
-    document.getElementById("output").textContent = encrypted;
-  }
+            return btoa(String.fromCharCode(...outputBytes));
+        }
 
-  function decrypt() {
-    // Your decryption logic here
-    const input = document.getElementById("input").value;
-    // Example: simple Caesar cipher decryption
-    const decrypted = caesarCipher(input, -3); 
-    document.getElementById("output").textContent = decrypted;
-  }
-  function caesarCipher(str, shift) {
-    let result = '';
-    for (let i = 0; i < str.length; i++) {
-      let charCode = str.charCodeAt(i);
-      if (charCode >= 65 && charCode <= 90) {
-        result += String.fromCharCode(((charCode - 65 + shift + 26) % 26) + 65);
-      } else if (charCode >= 97 && charCode <= 122) {
-        result += String.fromCharCode(((charCode - 97 + shift + 26) % 26) + 97);
-      } else {
-        result += str.charAt(i);
-      }
-    }
-    return result;
-  }
+        function decrypt(input) {
+            let inputBytes = new Uint8Array(atob(input).split("").map(c => c.charCodeAt(0)));
+            let outputBytes = new Uint8Array(inputBytes.length);
 
-  function copyOutput() {
-    const outputText = document.getElementById("output").textContent;
-    navigator.clipboard.writeText(outputText)
-      .then(() => {
-        // Optional: Display a message or change button text on success
-        alert("Text copied!"); 
-      })
-      .catch(err => {
-        console.error("Failed to copy text: ", err);
-      });
-  }
-</script>
+            for (let i = 0; i < inputBytes.length; i++) {
+                let b = inputBytes[i];
+                b ^= xorKey;
+                b = (b * modularMultiplicativeInverse(multiplyFactor, 256)) & 0xFF; // Ensure 8-bit result
+                b = (b >> shiftFactor) | (b << (8 - shiftFactor));
+                outputBytes[i] = b;
+            }
 
+            return new TextDecoder("utf-8").decode(outputBytes);
+        }
+
+        function modularMultiplicativeInverse(a, m) {
+            for (let x = 1; x < m; x++) {
+                if ((a * x) % m === 1) {
+                    return x;
+                }
+            }
+            throw new Error("Modular multiplicative inverse does not exist.");
+        }
+        
+        function copyToClipboard() {
+            const outputText = document.getElementById("outputTextArea");
+            outputText.select();
+            document.execCommand("copy");
+        }
+    </script>
 </body>
 </html>
