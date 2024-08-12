@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Encryption/Decryption Service</title>
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.container {
+  background-color: #fff;
+  padding: 3rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  max-width: 600px;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+button {
+  background-color: #04aa6d;
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #068c5a;
+}
+
+.output-container {
+  margin-top: 2rem;
+  background-color: #eee;
+  padding: 1rem;
+  border-radius: 4px;
+  word-break: break-all;
+  position: relative;
+}
+
+.copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: #3498db;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.3s;
+}
+
+.copy-button:hover {
+  background-color: #217dbb;
+}
+</style>
+</head>
+<body>
+
+<h1>Encryption/Decryption Service</h1>
+
+<div class="container">
+  <label for="input">Enter Text:</label>
+  <input type="text" id="input">
+
+  <button onclick="encrypt()">Encrypt</button>
+  <button onclick="decrypt()">Decrypt</button>
+
+  <div class="output-container" id="output-container">
+    <span id="output"></span>
+    <button class="copy-button" onclick="copyOutput()">Copy</button>
+  </div>
+</div>
+
+<script>
+  // Please provide your C# encryption and decryption methods
+  // I will help you convert them to JavaScript
+
+  function encrypt() {
+    // Your encryption logic here
+    const input = document.getElementById("input").value;
+    // Example: simple Caesar cipher
+    const encrypted = caesarCipher(input, 3); 
+    document.getElementById("output").textContent = encrypted;
+  }
+
+  function decrypt() {
+    // Your decryption logic here
+    const input = document.getElementById("input").value;
+    // Example: simple Caesar cipher decryption
+    const decrypted = caesarCipher(input, -3); 
+    document.getElementById("output").textContent = decrypted;
+  }
+  function caesarCipher(str, shift) {
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+      let charCode = str.charCodeAt(i);
+      if (charCode >= 65 && charCode <= 90) {
+        result += String.fromCharCode(((charCode - 65 + shift + 26) % 26) + 65);
+      } else if (charCode >= 97 && charCode <= 122) {
+        result += String.fromCharCode(((charCode - 97 + shift + 26) % 26) + 97);
+      } else {
+        result += str.charAt(i);
+      }
+    }
+    return result;
+  }
+
+  function copyOutput() {
+    const outputText = document.getElementById("output").textContent;
+    navigator.clipboard.writeText(outputText)
+      .then(() => {
+        // Optional: Display a message or change button text on success
+        alert("Text copied!"); 
+      })
+      .catch(err => {
+        console.error("Failed to copy text: ", err);
+      });
+  }
+</script>
+
+</body>
+</html>
